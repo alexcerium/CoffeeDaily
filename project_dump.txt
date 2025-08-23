@@ -1,0 +1,1372 @@
+//
+//  CoffeDailyTests.swift
+//  CoffeDailyTests
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import Testing
+
+struct CoffeDailyTests {
+
+    @Test func example() async throws {
+        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    }
+
+}
+//
+//  CartViewModel.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import Foundation
+import SwiftUI
+
+final class CartViewModel: ObservableObject {
+    @Published var items: [CartItem] = []
+    @Published var animateBadge = false
+
+    func add(_ coffeeItem: CoffeeItem, size: String) {
+        if let idx = items.firstIndex(where: { $0.item.id == coffeeItem.id && $0.size == size }) {
+            items[idx].quantity += 1
+        } else {
+            items.append(CartItem(item: coffeeItem, size: size, quantity: 1))
+        }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+            animateBadge = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation { self.animateBadge = false }
+        }
+    }
+
+    func remove(_ cartItem: CartItem) {
+        withAnimation {
+            items.removeAll { $0 == cartItem }
+        }
+    }
+
+    var totalCount: Int {
+        items.reduce(0) { $0 + $1.quantity }
+    }
+}
+//
+//  MenuViewModel.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import Foundation
+
+final class CoffeeMenuViewModel: ObservableObject {
+    @Published var menu: [CoffeeItem] = [
+        .init(
+            imageName: "latte",
+            title: "Латте",
+            description: "Классический латте на молоке",
+            prices: ["S": 3.0, "M": 3.5, "L": 4.0]
+        ),
+        .init(
+            imageName: "cappuccino",
+            title: "Капучино",
+            description: "Воздушная молочная пенка и насыщенный вкус",
+            prices: ["S": 2.8, "M": 3.0, "L": 3.4]
+        ),
+        .init(
+            imageName: "americano",
+            title: "Американо",
+            description: "Чёрный кофе, насыщенный и крепкий",
+            prices: ["S": 2.0, "M": 2.5, "L": 2.8]
+        ),
+        .init(
+            imageName: "flatwhite",
+            title: "Флэт уайт",
+            description: "Идеальный баланс эспрессо и молока",
+            prices: ["S": 3.5, "M": 3.8, "L": 4.2]
+        ),
+        .init(
+            imageName: "espresso",
+            title: "Эспрессо",
+            description: "Быстрый, крепкий, бодрящий",
+            prices: ["S": 1.8, "M": 2.0, "L": 2.3]
+        ),
+        .init(
+            imageName: "mocha",
+            title: "Мокка",
+            description: "Шоколадный латте с эспрессо",
+            prices: ["S": 3.5, "M": 4.0, "L": 4.5]
+        ),
+        .init(
+            imageName: "macchiato",
+            title: "Макиато",
+            description: "Капля молока в чистом эспрессо",
+            prices: ["S": 2.5, "M": 2.7, "L": 3.0]
+        ),
+        .init(
+            imageName: "raf",
+            title: "Раф",
+            description: "Сливочный кофейный напиток",
+            prices: ["S": 4.0, "M": 4.2, "L": 4.6]
+        ),
+        .init(
+            imageName: "icecoffee",
+            title: "Айс Кофе",
+            description: "Охлаждённый кофе со льдом",
+            prices: ["S": 2.8, "M": 3.3, "L": 3.7]
+        ),
+        .init(
+            imageName: "frappe",
+            title: "Фраппе",
+            description: "Взбитый кофе с молоком и льдом",
+            prices: ["S": 3.5, "M": 3.9, "L": 4.2]
+        )
+    ]
+}
+//
+//  OrdersViewModel.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import Foundation
+
+final class OrdersViewModel: ObservableObject {
+    @Published var orders: [Order] = []
+}
+//
+//  NotificationsViewModel.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import Foundation
+
+final class NotificationsViewModel: ObservableObject {
+    @Published var notifications: [NotificationItem] = [
+        .init(
+            title: "−25 % на все фраппе!",
+            message: "Сохраните прохладу лета — только сегодня скидка 25 % на все фраппе.",
+            date: Date()
+        )
+    ]
+}
+//
+//  HomeViewModel.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import Foundation
+import MapKit
+
+final class CoffeeHomeViewModel: ObservableObject {
+    @Published var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 60.1699, longitude: 24.9384),
+        span: MKCoordinateSpan(latitudeDelta: 0.06, longitudeDelta: 0.06)
+    )
+    @Published var locations: [CoffeeLocation] = [
+        .init(coordinate: .init(latitude: 60.1686, longitude: 24.9398)),
+        .init(coordinate: .init(latitude: 60.1625, longitude: 24.9450)),
+        .init(coordinate: .init(latitude: 60.1712, longitude: 24.9230)),
+        .init(coordinate: .init(latitude: 60.1790, longitude: 24.9302))
+    ]
+}
+//
+//  Coordinator.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import SwiftUI
+
+enum Route: Hashable {
+    case home
+    case menu
+    case orders
+    case cart
+    case payment
+    case profile
+    case notifications
+}
+
+final class AppCoordinator: ObservableObject {
+    @Published var path: [Route] = []
+
+    @ViewBuilder
+    func start() -> some View {
+        CoffeeHomeView()
+    }
+
+    func navigate(to route: Route) {
+        path.append(route)
+    }
+
+    func pop() {
+        
+        if !path.isEmpty {
+            path.removeLast()
+        }
+    }
+}
+//
+//  CoffeDailyApp.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import SwiftUI
+
+@main
+struct CoffeeDailyApp: App {
+    @StateObject private var coordinator = AppCoordinator()
+    @StateObject private var cartViewModel = CartViewModel()
+    @StateObject private var ordersViewModel = OrdersViewModel()
+    @StateObject private var notificationsViewModel = NotificationsViewModel()
+
+    var body: some Scene {
+        WindowGroup {
+            NavigationStack(path: $coordinator.path) {
+                coordinator.start()
+            }
+            .environmentObject(coordinator)
+            .environmentObject(cartViewModel)
+            .environmentObject(ordersViewModel)
+            .environmentObject(notificationsViewModel)
+            .preferredColorScheme(.dark)
+        }
+    }
+}
+//
+//  Order.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import Foundation
+
+struct Order: Identifiable {
+    let id = UUID()
+    let date: Date
+    let items: [CartItem]
+}
+//
+//  CartItem.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import Foundation
+
+struct CartItem: Identifiable, Equatable {
+    let id = UUID()
+    let item: CoffeeItem
+    var size: String
+    var quantity: Int
+
+    static func == (lhs: CartItem, rhs: CartItem) -> Bool {
+        lhs.item.id == rhs.item.id && lhs.size == rhs.size
+    }
+}
+//
+//  CoffeeItem.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import Foundation
+
+struct CoffeeItem: Identifiable, Equatable {
+    let id = UUID()
+    let imageName: String
+    let title: String
+    let description: String
+    let prices: [String: Double] 
+}
+//
+//  CoffeeLocation.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import Foundation
+import CoreLocation
+
+struct CoffeeLocation: Identifiable {
+    let id = UUID()
+    let coordinate: CLLocationCoordinate2D
+}
+//
+//  NotificationItem.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import Foundation
+
+struct NotificationItem: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+    let date: Date
+}
+//
+//  ActionButtonsView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+
+import SwiftUI
+
+struct ActionButtonsView: View {
+    @EnvironmentObject private var coordinator: AppCoordinator
+
+    var body: some View {
+        HStack(spacing: 20) {
+            PillButton(title: "Меню", sfSymbol: "menucard") {
+                coordinator.navigate(to: .menu)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 64)
+
+            PillButton(title: "История", sfSymbol: "clock") {
+                coordinator.navigate(to: .orders)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 64)
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+//
+//  CoffeeHomeView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+
+import SwiftUI
+import MapKit
+
+struct CoffeeHomeView: View {
+    @EnvironmentObject private var coordinator: AppCoordinator
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    @EnvironmentObject private var ordersViewModel: OrdersViewModel
+    @EnvironmentObject private var notificationsViewModel: NotificationsViewModel
+    @StateObject private var viewModel = CoffeeHomeViewModel()
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.mocha, .mint], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 28) {
+                    HeaderBarView()
+                    TitleView(text: "Добро пожаловать в CoffeeDaily!")
+                    SampleCarouselCardView(
+                        images: ["breakfast1", "breakfast2", "breakfast3"],
+                        captions: ["−20 % на сеты завтрака",
+                                   "Круассан в подарок к латте",
+                                   "Смузи дня — 3 € 50"]
+                    )
+                    ActionButtonsView()
+                    LocationsMapCardView(region: $viewModel.region, locations: viewModel.locations)
+                }
+                .padding(.horizontal)
+                .padding(.top, 12)
+                .padding(.bottom, 36)
+            }
+        }
+        .navigationDestination(for: Route.self) { route in
+            switch route {
+            case .home: EmptyView()
+            case .menu: CoffeeMenuScreen()
+            case .orders: OrdersView()
+            case .cart: CartView()
+            case .payment: PaymentView()
+            case .profile: ProfileView()
+            case .notifications: NotificationsView()
+            }
+        }
+        .navigationBarHidden(true)
+    }
+}
+//
+//  PaymentView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import SwiftUI
+
+struct PaymentView: View {
+    @EnvironmentObject private var coordinator: AppCoordinator
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    @EnvironmentObject private var ordersViewModel: OrdersViewModel
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.mocha, .mint],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Spacer()
+                Text("Способы оплаты скоро появятся")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                Spacer()
+
+                PillButton(title: "Оплатить", sfSymbol: nil) {
+                    let newOrder = Order(date: Date(), items: cartViewModel.items)
+                    ordersViewModel.orders.append(newOrder)
+                    cartViewModel.items.removeAll()
+                    coordinator.navigate(to: .orders)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 64)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { coordinator.pop() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Оплата")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.white)
+            }
+        }
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible,           for: .navigationBar)
+    }
+}
+//
+//  TitleView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import SwiftUI
+
+struct TitleView: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.largeTitle.bold())
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.leading)
+    }
+}
+//
+//  LocationsMapCardView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import SwiftUI
+import MapKit
+
+struct LocationsMapCardView: View {
+    @Binding var region: MKCoordinateRegion
+    let locations: [CoffeeLocation]
+
+    var body: some View {
+        GlassCard {
+            Map(coordinateRegion: $region, annotationItems: locations) { loc in
+                MapMarker(coordinate: loc.coordinate, tint: .red)
+            }
+            .frame(height: 180)   
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+        }
+    }
+}
+//
+//  GlassCard.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import SwiftUI
+
+struct GlassCard<Content: View>: View {
+    @ViewBuilder var content: Content
+    var body: some View {
+        content
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 30)
+                    .fill(.ultraThinMaterial)
+                    .background(
+                        RoundedRectangle(cornerRadius: 30)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.05), Color.white.opacity(0.01)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 30)
+                    .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+            )
+    }
+}
+
+struct VisualEffectBlur: UIViewRepresentable {
+    var blurStyle: UIBlurEffect.Style
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: UIBlurEffect(style: blurStyle))
+    }
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
+}
+//
+//  PillButton.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import SwiftUI
+
+struct PillButton: View {
+    let title: String
+    let sfSymbol: String?
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if let sf = sfSymbol {
+                    Image(systemName: sf)
+                        .font(.headline)
+                }
+                Text(title)
+                    .font(.headline.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.white)
+        .background(
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .background(
+                    Capsule()
+                        .fill(Color.white.opacity(0.08))
+                )
+        )
+        .overlay(
+            Capsule()
+                .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+        )
+        .shadow(radius: 4, y: 2)
+    }
+}
+//
+//  PromoCardView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import SwiftUI
+
+/// Swipeable carousel inside a glass card.
+import SwiftUI
+
+struct SampleCarouselCardView: View {
+    let images:   [String]      // names in Assets
+    let captions: [String]      // promo text for each image
+
+    @State private var index = 0
+    private let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        GlassCard {
+            TabView(selection: $index) {
+                ForEach(images.indices, id: \.self) { i in
+                    ZStack(alignment: .bottomLeading) {
+                        spatialImage(images[i])
+                        // Caption overlay
+                        Text(captions[i])
+                            .font(.headline.weight(.semibold))
+                            .padding(12)
+                            .foregroundStyle(.white)
+                            .background(.black.opacity(0.4))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .padding()
+                    }
+                    .tag(i)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .automatic))
+            .frame(height: 240)
+            .onReceive(timer) { _ in
+                withAnimation {
+                    index = (index + 1) % images.count
+                }
+            }
+        }
+    }
+
+    /// Applies blurred edge mask to make photo look spatial (visionOS‑style)
+    @ViewBuilder
+    private func spatialImage(_ name: String) -> some View {
+        GeometryReader { geo in
+            let height = geo.size.height
+            let width  = geo.size.width
+            ZStack {
+                // Blurred copy expands outward to create soft edge
+                Image(name)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: width, height: height)
+                    .blur(radius: 20)
+                    .clipped()
+                // Sharp center image masked with fade to create blend
+                Image(name)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: width, height: height)
+                    .mask(
+                        RadialGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .white,       location: 0.7),
+                                .init(color: .white.opacity(0), location: 1)
+                            ]),
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: max(width, height) * 0.8)
+                    )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+        }
+    }
+}
+//
+//  HeaderBarView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import SwiftUI
+
+struct HeaderBarView: View {
+    @EnvironmentObject private var coordinator: AppCoordinator
+
+    var body: some View {
+        HStack {
+            // Профиль
+            Button {
+                coordinator.navigate(to: .profile)
+            } label: {
+                Image(systemName: "person.circle")
+                    .symbolRenderingMode(.hierarchical)
+                    .font(.system(size: 30))
+            }
+
+            Spacer()
+
+            // Уведомления
+            Button {
+                coordinator.navigate(to: .notifications)
+            } label: {
+                Image(systemName: "bell.circle")
+                    .symbolRenderingMode(.hierarchical)
+                    .font(.system(size: 30))
+            }
+        }
+        .foregroundColor(.white.opacity(0.9))
+    }
+}
+//
+//  ProfileView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import SwiftUI
+
+struct ProfileView: View {
+    @EnvironmentObject private var coordinator: AppCoordinator
+    @State private var name = ""
+    @State private var email = ""
+    @State private var password = ""
+    @State private var registered = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.mocha, .mint],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                if registered {
+                    Text("Добро пожаловать, \(name)!")
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(.white)
+                        .padding(.top, 40)
+                } else {
+                    Text("Регистрация")
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(.white)
+                        .padding(.top, 40)
+
+                    Group {
+                        TextField("Имя", text: $name)
+                        TextField("Email", text: $email)
+                            .keyboardType(.emailAddress)
+                        SecureField("Пароль", text: $password)
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 24)
+
+                    Button {
+                        registered = true
+                        // здесь можно сохранять учётку
+                    } label: {
+                        Text("Зарегистрироваться")
+                            .font(.headline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Capsule().fill(Color.mint))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 40)
+                    }
+                }
+
+                Spacer()
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            // та же стрелка «назад»
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { coordinator.pop() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            // заголовок «Профиль» на том же уровне
+            ToolbarItem(placement: .principal) {
+                Text("Профиль")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible,           for: .navigationBar)
+    }
+}
+//
+//  CoffeeMenuCard.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import SwiftUI
+
+struct CoffeeMenuCard: View {
+    let item: CoffeeItem
+    @State private var selectedSize: String = "M"
+    private let sizes = ["S", "M", "L"]
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    @Namespace private var animation
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(item.imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .shadow(radius: 5)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(item.title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.white)
+
+                Text(item.description)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(2)
+
+                HStack(spacing: 10) {
+                    ForEach(sizes, id: \.self) { size in
+                        Button {
+                            selectedSize = size
+                        } label: {
+                            Text(size)
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(selectedSize == size
+                                              ? Color.white.opacity(0.25)
+                                              : Color.clear)
+                                )
+                                .foregroundStyle(.white)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                HStack {
+                    Text("€\(item.prices[selectedSize]!, specifier: "%.2f")")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white)
+
+                    Spacer()
+
+                    PillButton(title: "Добавить", sfSymbol: "plus") {
+                        cartViewModel.add(item, size: selectedSize)
+                    }
+                    .frame(minWidth: 100)   // минимальная ширина
+                    .frame(height: 40)      // увеличенная высота
+                    .matchedGeometryEffect(id: "\(item.id)-\(selectedSize)", in: animation)
+                }
+                .padding(.top, 4)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 30)
+                .fill(.ultraThinMaterial)
+                .background(
+                    RoundedRectangle(cornerRadius: 30)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.05), Color.white.opacity(0.01)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 30)
+                .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+        )
+        .shadow(radius: 4, y: 2)
+    }
+}
+//
+//  CoffeeMenuScreen.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import SwiftUI
+
+struct CoffeeMenuScreen: View {
+    @EnvironmentObject private var coordinator: AppCoordinator
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    @StateObject private var viewModel = CoffeeMenuViewModel()
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color.brown.opacity(0.7), Color.black], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    ForEach(viewModel.menu) { item in
+                        CoffeeMenuCard(item: item)
+                            .environmentObject(cartViewModel)
+                            .padding(.horizontal, 16)
+                    }
+                }
+                .padding(.top, 12)
+                .padding(.bottom, 36)
+            }
+
+            // кнопка корзины с бейджем
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    ZStack(alignment: .topTrailing) {
+                        Button {
+                            coordinator.navigate(to: .cart)
+                        } label: {
+                            Image(systemName: "cart")
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(Circle().fill(Color.mint.opacity(0.85)))
+                                .shadow(color: Color.black.opacity(0.4), radius: 8, y: 4)
+                        }
+                        if cartViewModel.totalCount > 0 {
+                            Text("\(cartViewModel.totalCount)")
+                                .font(.caption2.bold())
+                                .foregroundColor(.white)
+                                .padding(6)
+                                .background(Circle().fill(Color.red))
+                                .offset(x: 8, y: -8)
+                                .scaleEffect(cartViewModel.animateBadge ? 1.2 : 1)
+                        }
+                    }
+                    .padding(.trailing, 24)
+                    .padding(.bottom, 16)
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            // единый стиль «назад»
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { coordinator.pop() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Меню")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible,           for: .navigationBar)
+    }
+}
+//
+//  CartItemCard.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import SwiftUI
+
+struct CartItemCard: View {
+    @Binding var cartItem: CartItem
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    private let sizes = ["S", "M", "L"]
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(cartItem.item.imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 15))
+                .shadow(radius: 3)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(cartItem.item.title)
+                    .font(.headline)
+
+                Picker("", selection: $cartItem.size) {
+                    ForEach(sizes, id: \.self) { size in
+                        Text(size).tag(size)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(height: 32)
+
+                HStack(spacing: 12) {
+                    Button {
+                        if cartItem.quantity > 1 {
+                            cartItem.quantity -= 1
+                        }
+                    } label: {
+                        Image(systemName: "minus.circle")
+                            .font(.title2)
+                    }
+
+                    Text("\(cartItem.quantity)")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(minWidth: 24)
+
+                    Button {
+                        cartItem.quantity += 1
+                    } label: {
+                        Image(systemName: "plus.circle")
+                            .font(.title2)
+                    }
+                }
+
+                Text("€\(cartItem.item.prices[cartItem.size]!, specifier: "%.2f")")
+                    .font(.subheadline.weight(.medium))
+            }
+
+            Spacer()
+
+            Button {
+                cartViewModel.remove(cartItem)
+            } label: {
+                Image(systemName: "trash")
+                    .foregroundStyle(.red)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+        )
+    }
+}
+//
+//  CartView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import SwiftUI
+
+struct CartView: View {
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    @EnvironmentObject private var coordinator: AppCoordinator
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.mocha.opacity(0.6), .mint],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                if cartViewModel.items.isEmpty {
+                    Spacer()
+                    Text("Ваша корзина пуста")
+                        .foregroundStyle(.white.opacity(0.7))
+                    Spacer()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach($cartViewModel.items, id: \.id) { $ci in
+                                CartItemCard(cartItem: $ci)
+                                    .environmentObject(cartViewModel)
+                                    .padding(.horizontal, 16)
+                            }
+                        }
+                    }
+
+                    PillButton(title: "Заказать", sfSymbol: nil) {
+                        coordinator.navigate(to: .payment)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 64)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { coordinator.pop() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Корзина")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.white)
+            }
+        }
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible,           for: .navigationBar)
+    }
+}
+//
+//  OrdersView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import SwiftUI
+
+struct OrdersView: View {
+    @EnvironmentObject private var ordersViewModel: OrdersViewModel
+    @EnvironmentObject private var cartViewModel: CartViewModel
+    @EnvironmentObject private var coordinator: AppCoordinator
+
+    private var dateFormatter: DateFormatter {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "ru_RU")
+        df.dateStyle = .medium
+        df.timeStyle = .short
+        return df
+    }
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.mocha, .mint],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 16) {
+                    if ordersViewModel.orders.isEmpty {
+                        Text("История заказов пуста")
+                            .foregroundStyle(.white.opacity(0.7))
+                            .padding(.top, 40)
+                    } else {
+                        ForEach(ordersViewModel.orders) { order in
+                            GlassCard {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    HStack {
+                                        Text("Заказ от \(dateFormatter.string(from: order.date))")
+                                            .font(.headline.weight(.semibold))
+                                            .foregroundStyle(.white)
+                                        Spacer()
+                                        Button {
+                                            cartViewModel.items = order.items
+                                            coordinator.navigate(to: .cart)
+                                        } label: {
+                                            Image(systemName: "arrow.clockwise.circle")
+                                                .font(.title2)
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+                                    ForEach(order.items) { ci in
+                                        HStack {
+                                            Text("\(ci.quantity)× \(ci.item.title) (\(ci.size))")
+                                                .font(.subheadline)
+                                                .foregroundStyle(.white)
+                                            Spacer()
+                                            let lineTotal = ci.item.prices[ci.size]! * Double(ci.quantity)
+                                            Text("€\(lineTotal, specifier: "%.2f")")
+                                                .font(.subheadline.weight(.medium))
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+                                }
+                                .padding()
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                    }
+                }
+                .padding(.vertical, 16)
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { coordinator.pop() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("История заказов")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible,           for: .navigationBar)
+    }
+}
+//
+//  NotificationsView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 21.04.2025.
+//
+
+import SwiftUI
+
+struct NotificationsView: View {
+    @EnvironmentObject private var notificationsViewModel: NotificationsViewModel
+    @EnvironmentObject private var coordinator: AppCoordinator
+
+    private var dateFormatter: DateFormatter {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "ru_RU")
+        df.dateStyle = .short
+        df.timeStyle = .short
+        return df
+    }
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.mocha, .mint],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(notificationsViewModel.notifications) { note in
+                        GlassCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(note.title)
+                                    .font(.headline.weight(.semibold))
+                                    .foregroundStyle(.white)
+                                Text(note.message)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.8))
+                                Text(dateFormatter.string(from: note.date))
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.6))
+                            }
+                            .padding()
+                        }
+                        .padding(.horizontal, 16)
+                    }
+                }
+                .padding(.vertical, 16)
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { coordinator.pop() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Уведомления")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible,           for: .navigationBar)
+    }
+}
+//
+//  Theme.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
+import SwiftUI
+
+extension Color {
+    static let mocha = Color(red: 0.26, green: 0.20, blue: 0.15)
+    static let mint  = Color(red: 0.18, green: 0.29, blue: 0.28)
+}
+//
+//  CoffeDailyUITests.swift
+//  CoffeDailyUITests
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import XCTest
+
+final class CoffeDailyUITests: XCTestCase {
+
+    override func setUpWithError() throws {
+        // Put setup code here. This method is called before the invocation of each test method in the class.
+
+        // In UI tests it is usually best to stop immediately when a failure occurs.
+        continueAfterFailure = false
+
+        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+    }
+
+    override func tearDownWithError() throws {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+
+    @MainActor
+    func testExample() throws {
+        // UI tests must launch the application that they test.
+        let app = XCUIApplication()
+        app.launch()
+
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    }
+
+    @MainActor
+    func testLaunchPerformance() throws {
+        // This measures how long it takes to launch your application.
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            XCUIApplication().launch()
+        }
+    }
+}
+//
+//  CoffeDailyUITestsLaunchTests.swift
+//  CoffeDailyUITests
+//
+//  Created by Aleksandr on 17.04.2025.
+//
+
+import XCTest
+
+final class CoffeDailyUITestsLaunchTests: XCTestCase {
+
+    override class var runsForEachTargetApplicationUIConfiguration: Bool {
+        true
+    }
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
+
+    @MainActor
+    func testLaunch() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Insert steps here to perform after app launch but before taking a screenshot,
+        // such as logging into a test account or navigating somewhere in the app
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Launch Screen"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+}
