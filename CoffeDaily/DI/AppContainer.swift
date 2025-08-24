@@ -5,14 +5,8 @@
 //  Created by Alex on 24.08.2025.
 //
 
-//
-//  AppContainer.swift
-//  CoffeDaily
-//
-//  Created by Alex on 24.08.2025.
-//
-
 import Foundation
+import FirebaseAuth
 
 @MainActor
 final class AppContainer: ObservableObject {
@@ -23,9 +17,11 @@ final class AppContainer: ObservableObject {
     private(set) var notificationsRepository: NotificationsRepository
     private(set) var locationsRepository: LocationsRepository
     private(set) var userRepository: UserRepository
+    private(set) var authRepository: AuthRepository
 
     // Use cases
     private(set) var fetchMenu: FetchMenuUseCase
+
     // Cart
     private(set) var getCart: GetCartUseCase
     private(set) var addToCart: AddToCartUseCase
@@ -33,37 +29,48 @@ final class AppContainer: ObservableObject {
     private(set) var removeFromCart: RemoveFromCartUseCase
     private(set) var clearCart: ClearCartUseCase
     private(set) var observeCartTotals: ObserveCartTotalsUseCase
+
     // Orders
     private(set) var placeOrder: PlaceOrderUseCase
     private(set) var fetchOrders: FetchOrdersUseCase
     private(set) var reorder: ReorderUseCase
+
     // Notifications
     private(set) var fetchNotifications: FetchNotificationsUseCase
+
     // Locations
     private(set) var fetchLocations: FetchLocationsUseCase
+
     // User
     private(set) var getCurrentUser: GetCurrentUserUseCase
     private(set) var saveProfile: SaveProfileUseCase
 
+    // Auth
+    private(set) var observeAuth: ObserveAuthUseCase
+    private(set) var signInEmail: SignInEmailUseCase
+    private(set) var registerEmail: RegisterEmailUseCase
+    private(set) var signInAnonymously: SignInAnonUseCase
+    private(set) var linkAnonymousToEmail: LinkAnonToEmailUseCase
+    private(set) var signOut: SignOutUseCase
+
     init() {
-        // Firebase-only: меню
-        let client = FakeFirebaseClient()
-        let coffeeRepo = FirebaseCoffeeRepository(client: client)
-        self.coffeeRepository = coffeeRepo
-        self.fetchMenu = FetchMenuUseCase(repository: coffeeRepo)
+        // Current UID provider (resolved on each repository call)
+        let uidProvider: () -> String? = { Auth.auth().currentUser?.uid }
 
-        // Resolver без захвата self
-        let resolveById: (UUID) -> CoffeeItem? = { id in
-            MenuIndex.shared.item(by: id)
-        }
+        // Index resolver for mapping cart/order items
+        let resolveById: (UUID) -> CoffeeItem? = { MenuIndex.shared.item(by: $0) }
 
-        // Остальные репозитории
-        let cartRepo = FirebaseCartRepository(resolveItem: resolveById)
-        let ordersRepo = FirebaseOrdersRepository(resolveItem: resolveById)
-        let notesRepo  = FirebaseNotificationsRepository()
+        // Repositories (real Firestore/Auth only)
+        let authRepo = FirebaseAuthRepository()
+        let coffeeRepo = FirebaseCoffeeRepository()
+        let cartRepo   = FirebaseCartRepository(uidProvider: uidProvider, resolveItem: resolveById)
+        let ordersRepo = FirebaseOrdersRepository(uidProvider: uidProvider, resolveItem: resolveById)
+        let notesRepo  = FirebaseNotificationsRepository(uidProvider: uidProvider)
         let locsRepo   = FirebaseLocationsRepository()
         let userRepo   = FirebaseUserRepository()
 
+        self.authRepository = authRepo
+        self.coffeeRepository = coffeeRepo
         self.cartRepository = cartRepo
         self.ordersRepository = ordersRepo
         self.notificationsRepository = notesRepo
@@ -71,6 +78,8 @@ final class AppContainer: ObservableObject {
         self.userRepository = userRepo
 
         // Use cases
+        self.fetchMenu = FetchMenuUseCase(repository: coffeeRepo)
+
         self.getCart = GetCartUseCase(repo: cartRepo)
         self.addToCart = AddToCartUseCase(repo: cartRepo)
         self.updateCartItem = UpdateCartItemUseCase(repo: cartRepo)
@@ -87,5 +96,12 @@ final class AppContainer: ObservableObject {
 
         self.getCurrentUser = GetCurrentUserUseCase(repo: userRepo)
         self.saveProfile    = SaveProfileUseCase(repo: userRepo)
+
+        self.observeAuth = ObserveAuthUseCase(repo: authRepo)
+        self.signInEmail = SignInEmailUseCase(repo: authRepo)
+        self.registerEmail = RegisterEmailUseCase(repo: authRepo)
+        self.signInAnonymously = SignInAnonUseCase(repo: authRepo)
+        self.linkAnonymousToEmail = LinkAnonToEmailUseCase(repo: authRepo)
+        self.signOut = SignOutUseCase(repo: authRepo)
     }
 }

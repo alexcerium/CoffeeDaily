@@ -5,10 +5,12 @@
 //  Created by Alex on 24.08.2025.
 //
 
+// CoffeeDTO.swift
 import Foundation
+import FirebaseFirestore
 
-struct CoffeeDTO: Decodable {
-    let id: UUID?
+struct CoffeeDTO: Codable, Identifiable {
+    @DocumentID var id: String?
     let imageName: String
     let title: String
     let description: String
