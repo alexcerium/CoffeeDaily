@@ -8,11 +8,8 @@
 import Foundation
 
 final class NotificationsViewModel: ObservableObject {
-    @Published var notifications: [NotificationItem] = [
-        .init(
-            title: "−25 % на все фраппе!",
-            message: "Сохраните прохладу лета — только сегодня скидка 25 % на все фраппе.",
-            date: Date()
-        )
-    ]
+    @Published var notifications: [NotificationItem] = []
+    private let fetch: FetchNotificationsUseCase
+    init(fetch: FetchNotificationsUseCase) { self.fetch = fetch }
+    @MainActor func load() async { if let list = try? await fetch.execute() { self.notifications = list } }
 }

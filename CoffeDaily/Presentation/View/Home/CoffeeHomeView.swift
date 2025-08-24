@@ -4,6 +4,12 @@
 //
 //  Created by Aleksandr on 17.04.2025.
 
+//
+//  CoffeeHomeView.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 17.04.2025.
+
 import SwiftUI
 import MapKit
 
@@ -13,7 +19,7 @@ struct CoffeeHomeView: View {
     @EnvironmentObject private var ordersViewModel: OrdersViewModel
     @EnvironmentObject private var notificationsViewModel: NotificationsViewModel
     @EnvironmentObject private var container: AppContainer
-    @StateObject private var viewModel = CoffeeHomeViewModel()
+    @EnvironmentObject private var viewModel: CoffeeHomeViewModel
 
     var body: some View {
         ZStack {
@@ -26,9 +32,9 @@ struct CoffeeHomeView: View {
                     TitleView(text: "Добро пожаловать в CoffeeDaily!")
                     SampleCarouselCardView(
                         images: ["breakfast1", "breakfast2", "breakfast3"],
-                        captions: ["−20 % на сеты завтрака",
-                                   "Круассан в подарок к латте",
-                                   "Смузи дня — 3 € 50"]
+                        captions: ["−20 % на сеты завтрака",
+                                   "Круассан в подарок к латте",
+                                   "Смузи дня — 3 € 50"]
                     )
                     ActionButtonsView()
                     LocationsMapCardView(region: $viewModel.region, locations: viewModel.locations)
@@ -50,5 +56,6 @@ struct CoffeeHomeView: View {
             }
         }
         .navigationBarHidden(true)
+        .task { await viewModel.load() }
     }
 }

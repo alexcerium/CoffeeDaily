@@ -5,13 +5,6 @@
 //  Created by Aleksandr on 19.04.2025.
 //
 
-//
-//  CoffeeMenuViewModel.swift
-//  CoffeDaily
-//
-//  Created by Aleksandr on 19.04.2025.
-//
-
 import Foundation
 
 @MainActor
@@ -31,6 +24,7 @@ final class CoffeeMenuViewModel: ObservableObject {
         error = nil
         do {
             menu = try await fetchMenu.execute()
+            MenuIndex.shared.update(menu) // важное обновление индекса для Cart/Orders
         } catch {
             self.error = "Не удалось загрузить меню"
         }

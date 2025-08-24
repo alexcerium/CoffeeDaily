@@ -42,7 +42,7 @@ struct OrdersView: View {
                                             .foregroundStyle(.white)
                                         Spacer()
                                         Button {
-                                            cartViewModel.items = order.items
+                                            cartViewModel.replace(with: order.items)
                                             coordinator.navigate(to: .cart)
                                         } label: {
                                             Image(systemName: "arrow.clockwise.circle")
@@ -89,5 +89,6 @@ struct OrdersView: View {
         }
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible,           for: .navigationBar)
+        .task { await ordersViewModel.load() }
     }
 }
