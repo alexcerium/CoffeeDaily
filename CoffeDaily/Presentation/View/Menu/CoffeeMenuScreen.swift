@@ -5,31 +5,52 @@
 //  Created by Aleksandr on 19.04.2025.
 //
 
+//
+//  CoffeeMenuScreen.swift
+//  CoffeDaily
+//
+//  Created by Aleksandr on 19.04.2025.
+//
+
 import SwiftUI
 
 struct CoffeeMenuScreen: View {
     @EnvironmentObject private var coordinator: AppCoordinator
     @EnvironmentObject private var cartViewModel: CartViewModel
-    @StateObject private var viewModel = CoffeeMenuViewModel()
+
+    @StateObject private var viewModel: CoffeeMenuViewModel
+
+    init(fetchMenu: FetchMenuUseCase) {
+        _viewModel = StateObject(wrappedValue: CoffeeMenuViewModel(fetchMenu: fetchMenu))
+    }
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color.brown.opacity(0.7), Color.black], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color.brown.opacity(0.7), Color.black],
+                           startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    ForEach(viewModel.menu) { item in
-                        CoffeeMenuCard(item: item)
-                            .environmentObject(cartViewModel)
-                            .padding(.horizontal, 16)
+            Group {
+                if viewModel.isLoading {
+                    ProgressView().tint(.white)
+                } else if let error = viewModel.error {
+                    Text(error).foregroundStyle(.white.opacity(0.9))
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 20) {
+                            ForEach(viewModel.menu) { item in
+                                CoffeeMenuCard(item: item)
+                                    .environmentObject(cartViewModel)
+                                    .padding(.horizontal, 16)
+                            }
+                        }
+                        .padding(.top, 12)
+                        .padding(.bottom, 36)
                     }
                 }
-                .padding(.top, 12)
-                .padding(.bottom, 36)
             }
 
-            // кнопка корзины с бейджем
+            // Floating cart button with badge
             VStack {
                 Spacer()
                 HStack {
@@ -62,7 +83,6 @@ struct CoffeeMenuScreen: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar {
-            // единый стиль «назад»
             ToolbarItem(placement: .navigationBarLeading) {
                 Button { coordinator.pop() } label: {
                     Image(systemName: "chevron.left")
@@ -78,5 +98,6 @@ struct CoffeeMenuScreen: View {
         }
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible,           for: .navigationBar)
+        .task { await viewModel.load() }
     }
 }

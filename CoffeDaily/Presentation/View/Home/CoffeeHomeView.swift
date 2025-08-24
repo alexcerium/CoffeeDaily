@@ -12,6 +12,7 @@ struct CoffeeHomeView: View {
     @EnvironmentObject private var cartViewModel: CartViewModel
     @EnvironmentObject private var ordersViewModel: OrdersViewModel
     @EnvironmentObject private var notificationsViewModel: NotificationsViewModel
+    @EnvironmentObject private var container: AppContainer
     @StateObject private var viewModel = CoffeeHomeViewModel()
 
     var body: some View {
@@ -40,7 +41,7 @@ struct CoffeeHomeView: View {
         .navigationDestination(for: Route.self) { route in
             switch route {
             case .home: EmptyView()
-            case .menu: CoffeeMenuScreen()
+            case .menu: CoffeeMenuScreen(fetchMenu: container.fetchMenu)
             case .orders: OrdersView()
             case .cart: CartView()
             case .payment: PaymentView()
