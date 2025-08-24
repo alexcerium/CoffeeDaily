@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FAA2BE022E5A8A01009F57FE /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = FAA2BE012E5A8A01009F57FE /* FirebaseAI */; };
+		FAA2BE042E5A8A01009F57FE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FAA2BE032E5A8A01009F57FE /* FirebaseAuth */; };
+		FAA2BE062E5A8A01009F57FE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FAA2BE052E5A8A01009F57FE /* FirebaseFirestore */; };
+		FAA2BE082E5A8B68009F57FE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAA2BE072E5A8B68009F57FE /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		F2A0E3692DB13C15009DB179 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +34,7 @@
 		F2A0E35A2DB13C13009DB179 /* CoffeDaily.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoffeDaily.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2A0E3682DB13C15009DB179 /* CoffeDailyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoffeDailyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2A0E3722DB13C15009DB179 /* CoffeDailyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoffeDailyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAA2BE072E5A8B68009F57FE /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +60,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAA2BE022E5A8A01009F57FE /* FirebaseAI in Frameworks */,
+				FAA2BE042E5A8A01009F57FE /* FirebaseAuth in Frameworks */,
+				FAA2BE062E5A8A01009F57FE /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +90,7 @@
 				F2A0E36B2DB13C15009DB179 /* CoffeDailyTests */,
 				F2A0E3752DB13C15009DB179 /* CoffeDailyUITests */,
 				F2A0E35B2DB13C13009DB179 /* Products */,
+				FAA2BE072E5A8B68009F57FE /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +124,9 @@
 			);
 			name = CoffeDaily;
 			packageProductDependencies = (
+				FAA2BE012E5A8A01009F57FE /* FirebaseAI */,
+				FAA2BE032E5A8A01009F57FE /* FirebaseAuth */,
+				FAA2BE052E5A8A01009F57FE /* FirebaseFirestore */,
 			);
 			productName = CoffeDaily;
 			productReference = F2A0E35A2DB13C13009DB179 /* CoffeDaily.app */;
@@ -195,6 +210,9 @@
 			);
 			mainGroup = F2A0E3512DB13C13009DB179;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FAA2BE002E5A8A01009F57FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F2A0E35B2DB13C13009DB179 /* Products */;
 			projectDirPath = "";
@@ -212,6 +230,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAA2BE082E5A8B68009F57FE /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -595,6 +614,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FAA2BE002E5A8A01009F57FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FAA2BE012E5A8A01009F57FE /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FAA2BE002E5A8A01009F57FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		FAA2BE032E5A8A01009F57FE /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FAA2BE002E5A8A01009F57FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		FAA2BE052E5A8A01009F57FE /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FAA2BE002E5A8A01009F57FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F2A0E3522DB13C13009DB179 /* Project object */;
 }
