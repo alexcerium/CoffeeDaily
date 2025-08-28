@@ -20,17 +20,11 @@ enum Route: Hashable {
 final class AppCoordinator: ObservableObject {
     @Published var path: [Route] = []
 
-    @ViewBuilder
-    func start() -> some View {
-        CoffeeHomeView()
-    }
-
     func navigate(to route: Route) {
         path.append(route)
     }
 
     func pop() {
-        
         if !path.isEmpty {
             path.removeLast()
         }

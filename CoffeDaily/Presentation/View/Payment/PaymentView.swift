@@ -28,10 +28,14 @@ struct PaymentView: View {
                 Spacer()
 
                 PillButton(title: "Оплатить", sfSymbol: nil) {
-                    let newOrder = Order(date: Date(), items: cartViewModel.items)
-                    ordersViewModel.orders.append(newOrder)
-                    cartViewModel.items.removeAll()
-                    coordinator.navigate(to: .orders)
+                    Task {
+                        // Проводим оплату через доменный слой (репозиторий заказов)
+                        await ordersViewModel.placeOrder(from: cartViewModel.items)
+                        // Очищаем корзину через репозиторий
+                        await cartViewModel.clear()
+                        // Навигация в историю только после успешного завершения операций
+                        coordinator.navigate(to: .orders)
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)

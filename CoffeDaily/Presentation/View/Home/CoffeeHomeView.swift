@@ -4,12 +4,6 @@
 //
 //  Created by Aleksandr on 17.04.2025.
 
-//
-//  CoffeeHomeView.swift
-//  CoffeDaily
-//
-//  Created by Aleksandr on 17.04.2025.
-
 import SwiftUI
 import MapKit
 

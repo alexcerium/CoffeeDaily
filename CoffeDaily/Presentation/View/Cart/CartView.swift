@@ -28,7 +28,6 @@ struct CartView: View {
                         VStack(spacing: 12) {
                             ForEach($cartViewModel.items, id: \.id) { $ci in
                                 CartItemCard(cartItem: $ci)
-                                    .environmentObject(cartViewModel)
                                     .padding(.horizontal, 16)
                             }
                         }
@@ -61,5 +60,7 @@ struct CartView: View {
         }
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible,           for: .navigationBar)
+        // Явная загрузка списка при входе на экран (вне фазы рендера карточек)
+        .task { await cartViewModel.reload() }
     }
 }

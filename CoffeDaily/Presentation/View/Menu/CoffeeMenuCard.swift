@@ -14,6 +14,10 @@ struct CoffeeMenuCard: View {
     @EnvironmentObject private var cartViewModel: CartViewModel
     @Namespace private var animation
 
+    private var currentPrice: Double {
+        item.prices[selectedSize] ?? 0
+    }
+
     var body: some View {
         HStack(spacing: 16) {
             Image(item.imageName)
@@ -55,7 +59,7 @@ struct CoffeeMenuCard: View {
                 }
 
                 HStack {
-                    Text("€\(item.prices[selectedSize]!, specifier: "%.2f")")
+                    Text("€\(currentPrice, specifier: "%.2f")")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.white)
 
@@ -64,8 +68,8 @@ struct CoffeeMenuCard: View {
                     PillButton(title: "Добавить", sfSymbol: "plus") {
                         cartViewModel.add(item, size: selectedSize)
                     }
-                    .frame(minWidth: 100)   // минимальная ширина
-                    .frame(height: 40)      // увеличенная высота
+                    .frame(minWidth: 100)
+                    .frame(height: 40)
                     .matchedGeometryEffect(id: "\(item.id)-\(selectedSize)", in: animation)
                 }
                 .padding(.top, 4)

@@ -5,13 +5,6 @@
 //  Created by Aleksandr on 19.04.2025.
 //
 
-//
-//  CoffeeMenuScreen.swift
-//  CoffeDaily
-//
-//  Created by Aleksandr on 19.04.2025.
-//
-
 import SwiftUI
 
 struct CoffeeMenuScreen: View {
@@ -39,8 +32,7 @@ struct CoffeeMenuScreen: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 20) {
                             ForEach(viewModel.menu) { item in
-                                CoffeeMenuCard(item: item)
-                                    .environmentObject(cartViewModel)
+                                CoffeeMenuCard(item: item) // no redundant .environmentObject
                                     .padding(.horizontal, 16)
                             }
                         }
@@ -50,7 +42,6 @@ struct CoffeeMenuScreen: View {
                 }
             }
 
-            // Floating cart button with badge
             VStack {
                 Spacer()
                 HStack {

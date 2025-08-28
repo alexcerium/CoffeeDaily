@@ -5,8 +5,6 @@
 //  Created by Alex on 24.08.2025.
 //
 
-// Data/Repositories/FirebaseLocationsRepository.swift
-import FirebaseFirestore
 import FirebaseFirestore
 import CoreLocation
 
@@ -15,11 +13,6 @@ final class FirebaseLocationsRepository: LocationsRepository {
     func fetchNearby() async throws -> [CoffeeLocation] {
         let snap = try await db.collection("locations").getDocuments()
         let dtos = try snap.documents.compactMap { try $0.data(as: LocationDTO.self) }
-        return dtos.map {
-            CoffeeLocation(
-                id: UUID(),
-                coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
-            )
-        }
+        return dtos.map(LocationMapper.toEntity(_:))
     }
 }

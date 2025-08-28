@@ -5,7 +5,6 @@
 //  Created by Alex on 24.08.2025.
 //
 
-// Data/Repositories/FirebaseCartRepository.swift
 import FirebaseAuth
 import FirebaseFirestore
 
@@ -27,7 +26,8 @@ final class FirebaseCartRepository: CartRepository {
     func getItems() async throws -> [CartItem] {
         let snap = try await itemsColl().getDocuments()
         let dtos = try snap.documents.compactMap { try $0.data(as: CartItemDTO.self) }
-        return dtos.compactMap { CartMapper.toEntity($0, resolve: resolve) }
+        // Preserve rows even if menu index not yet ready
+        return dtos.map { CartMapper.toEntityLenient($0, resolve: resolve) }
     }
 
     func add(itemId: UUID, size: String, qty: Int) async throws {
@@ -68,9 +68,16 @@ final class FirebaseCartRepository: CartRepository {
             let listener = coll.addSnapshotListener { snap, _ in
                 guard let docs = snap?.documents else { return }
                 let dtos = docs.compactMap { try? $0.data(as: CartItemDTO.self) }
-                let entities = dtos.compactMap { CartMapper.toEntity($0, resolve: self.resolve) }
-                let count = entities.reduce(0) { $0 + $1.quantity }
-                let cost  = entities.reduce(0.0) { $0 + (($1.item.prices[$1.size] ?? 0) * Double($1.quantity)) }
+
+                // Count does not depend on menu availability
+                let count = dtos.reduce(0) { $0 + $1.qty }
+
+                // Cost computed only for resolvable items; unresolved treated as 0
+                let entities = dtos.map { CartMapper.toEntityLenient($0, resolve: self.resolve) }
+                let cost  = entities.reduce(0.0) {
+                    let unit = $1.item.prices[$1.size] ?? 0
+                    return $0 + unit * Double($1.quantity)
+                }
                 continuation.yield(.init(items: count, cost: cost))
             }
             continuation.onTermination = { _ in listener.remove() }

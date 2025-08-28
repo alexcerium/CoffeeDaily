@@ -12,6 +12,10 @@ struct CartItemCard: View {
     @EnvironmentObject private var cartViewModel: CartViewModel
     private let sizes = ["S", "M", "L"]
 
+    private var unitPrice: Double {
+        cartItem.item.prices[cartItem.size] ?? 0
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(cartItem.item.imageName)
@@ -55,7 +59,7 @@ struct CartItemCard: View {
                     }
                 }
 
-                Text("€\(cartItem.item.prices[cartItem.size]!, specifier: "%.2f")")
+                Text("€\(unitPrice, specifier: "%.2f")")
                     .font(.subheadline.weight(.medium))
             }
 
@@ -77,5 +81,12 @@ struct CartItemCard: View {
             RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
         )
+        // Без onChange: синхронизируемся в фоне ПОСЛЕ рендера
+        .task(id: cartItem.size) {
+            await cartViewModel.updateAsync(cartItem)
+        }
+        .task(id: cartItem.quantity) {
+            await cartViewModel.updateAsync(cartItem)
+        }
     }
 }

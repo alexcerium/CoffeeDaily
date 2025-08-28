@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		FAA2BE042E5A8A01009F57FE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FAA2BE032E5A8A01009F57FE /* FirebaseAuth */; };
 		FAA2BE062E5A8A01009F57FE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FAA2BE052E5A8A01009F57FE /* FirebaseFirestore */; };
-		FAA2BE082E5A8B68009F57FE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAA2BE072E5A8B68009F57FE /* GoogleService-Info.plist */; };
 		FAD883222E5B950F007E16A9 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FAD883212E5B950F007E16A9 /* FirebaseCore */; };
+		FAD883CF2E609D2D007E16A9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAD883CE2E609D2D007E16A9 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +34,7 @@
 		F2A0E35A2DB13C13009DB179 /* CoffeDaily.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoffeDaily.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2A0E3682DB13C15009DB179 /* CoffeDailyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoffeDailyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2A0E3722DB13C15009DB179 /* CoffeDailyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoffeDailyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		FAA2BE072E5A8B68009F57FE /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		FAD883CE2E609D2D007E16A9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -86,11 +86,11 @@
 		F2A0E3512DB13C13009DB179 = {
 			isa = PBXGroup;
 			children = (
+				FAD883CE2E609D2D007E16A9 /* GoogleService-Info.plist */,
 				F2A0E35C2DB13C13009DB179 /* CoffeDaily */,
 				F2A0E36B2DB13C15009DB179 /* CoffeDailyTests */,
 				F2A0E3752DB13C15009DB179 /* CoffeDailyUITests */,
 				F2A0E35B2DB13C13009DB179 /* Products */,
-				FAA2BE072E5A8B68009F57FE /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -230,7 +230,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAA2BE082E5A8B68009F57FE /* GoogleService-Info.plist in Resources */,
+				FAD883CF2E609D2D007E16A9 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

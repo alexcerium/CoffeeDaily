@@ -5,13 +5,6 @@
 //  Created by Aleksandr on 17.04.2025.
 //
 
-//
-//  CoffeDailyApp.swift
-//  CoffeDaily
-//
-//  Created by Aleksandr on 17.04.2025.
-//
-
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
@@ -29,23 +22,28 @@ struct CoffeeDailyApp: App {
     @StateObject private var profileViewModel: ProfileViewModel
 
     init() {
-        // 1) Инициализируем Firebase максимально рано
+        // 1) Firebase
         if FirebaseApp.app() == nil { FirebaseApp.configure() }
 
-        // 2) Включаем офлайн-кэш Firestore
+        // 2) Firestore cache
         let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
+        settings.isPersistenceEnabled = true 
         Firestore.firestore().settings = settings
 
-        // 3) DI: создаём контейнер и зависимости
+        // 3) DI
         let container = AppContainer()
         _container = StateObject(wrappedValue: container)
 
-        // Координатор навигации
         let coord = AppCoordinator()
         _coordinator = StateObject(wrappedValue: coord)
 
-        // Session VM с колбэком для «бесшовной» навигации
+        // Предзагрузка меню (для индекса)
+        Task {
+            if let items = try? await container.fetchMenu.execute() {
+                MenuIndex.shared.update(items)
+            }
+        }
+
         let sessionVM = SessionViewModel(
             observeAuth: container.observeAuth,
             signInAnon:  container.signInAnonymously,
@@ -55,13 +53,12 @@ struct CoffeeDailyApp: App {
             guard let coord else { return }
             DispatchQueue.main.async {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.9)) {
-                    coord.path.removeAll() // очищаем стек при логине/логауте/линке
+                    coord.path.removeAll()
                 }
             }
         }
         _sessionViewModel = StateObject(wrappedValue: sessionVM)
 
-        // Остальные VM
         _cartViewModel = StateObject(wrappedValue:
             CartViewModel(
                 getCart: container.getCart,
@@ -95,7 +92,6 @@ struct CoffeeDailyApp: App {
                 switch sessionViewModel.state {
                 case .loading:
                     ZStack { Color.clear.ignoresSafeArea(); ProgressView() }
-
                 case .unauthorized:
                     AuthScreen(
                         signInEmail:       container.signInEmail,
@@ -103,14 +99,12 @@ struct CoffeeDailyApp: App {
                         signInAnon:        container.signInAnonymously,
                         linkAnonToEmail:   container.linkAnonymousToEmail
                     )
-
                 case .authorized:
                     NavigationStack(path: $coordinator.path) {
                         CoffeeHomeView()
                     }
                 }
             }
-            // Глобальное окружение
             .environmentObject(coordinator)
             .environmentObject(container)
             .environmentObject(sessionViewModel)

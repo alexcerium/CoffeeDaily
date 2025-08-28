@@ -2,22 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>288458910199-oq439ubegm83timd1pj78khuivrk91os.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.288458910199-oq439ubegm83timd1pj78khuivrk91os</string>
 	<key>API_KEY</key>
-	<string>AIzaSyB6ru-A8hnOEuyal4tWukMiTwIARi9dcmQ</string>
+	<string>AIzaSyA8sTjQzPRhUBwcZmiKLSCAEUBaMMcJLWU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>288458910199</string>
+	<string>425785360266</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>alexcerium.CoffeDaily</string>
 	<key>PROJECT_ID</key>
-	<string>coffee-2765c</string>
+	<string>coffeedaily-c0209</string>
 	<key>STORAGE_BUCKET</key>
-	<string>coffee-2765c.firebasestorage.app</string>
+	<string>coffeedaily-c0209.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:288458910199:ios:c9179fa7dd20abc88866f2</string>
+	<string>1:425785360266:ios:46275aea86da8621a15273</string>
 </dict>
 </plist>

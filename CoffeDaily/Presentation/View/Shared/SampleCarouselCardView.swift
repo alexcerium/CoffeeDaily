@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-/// Swipeable carousel inside a glass card.
-import SwiftUI
-
 struct SampleCarouselCardView: View {
     let images:   [String]      // names in Assets
     let captions: [String]      // promo text for each image
@@ -42,10 +39,14 @@ struct SampleCarouselCardView: View {
                     index = (index + 1) % images.count
                 }
             }
+            // Prevent timer leak
+            .onDisappear {
+                timer.upstream.connect().cancel()
+            }
         }
     }
 
-    /// Applies blurred edge mask to make photo look spatial (visionOS‑style)
+    /// Applies blurred edge mask to make photo look spatial (visionOS-style)
     @ViewBuilder
     private func spatialImage(_ name: String) -> some View {
         GeometryReader { geo in
@@ -67,8 +68,8 @@ struct SampleCarouselCardView: View {
                     .mask(
                         RadialGradient(
                             gradient: Gradient(stops: [
-                                .init(color: .white,       location: 0.7),
-                                .init(color: .white.opacity(0), location: 1)
+                                .init(color: .white,              location: 0.7),
+                                .init(color: .white.opacity(0),   location: 1)
                             ]),
                             center: .center,
                             startRadius: 0,

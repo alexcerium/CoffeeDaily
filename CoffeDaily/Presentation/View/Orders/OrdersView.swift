@@ -42,8 +42,14 @@ struct OrdersView: View {
                                             .foregroundStyle(.white)
                                         Spacer()
                                         Button {
-                                            cartViewModel.replace(with: order.items)
-                                            coordinator.navigate(to: .cart)
+                                            Task {
+                                                // Получаем актуальные позиции для повтора из репозитория
+                                                let items = await ordersViewModel.itemsForReorder(orderId: order.id)
+                                                await MainActor.run {
+                                                    cartViewModel.replace(with: items)
+                                                    coordinator.navigate(to: .cart)
+                                                }
+                                            }
                                         } label: {
                                             Image(systemName: "arrow.clockwise.circle")
                                                 .font(.title2)
@@ -56,7 +62,8 @@ struct OrdersView: View {
                                                 .font(.subheadline)
                                                 .foregroundStyle(.white)
                                             Spacer()
-                                            let lineTotal = ci.item.prices[ci.size]! * Double(ci.quantity)
+                                            let unit = ci.item.prices[ci.size] ?? 0
+                                            let lineTotal = unit * Double(ci.quantity)
                                             Text("€\(lineTotal, specifier: "%.2f")")
                                                 .font(.subheadline.weight(.medium))
                                                 .foregroundStyle(.white)

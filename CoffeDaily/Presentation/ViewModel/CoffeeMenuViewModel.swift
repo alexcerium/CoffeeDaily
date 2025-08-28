@@ -23,8 +23,8 @@ final class CoffeeMenuViewModel: ObservableObject {
         isLoading = true
         error = nil
         do {
+            // Repository updates MenuIndex; no duplicate calls here
             menu = try await fetchMenu.execute()
-            MenuIndex.shared.update(menu) // важное обновление индекса для Cart/Orders
         } catch {
             self.error = "Не удалось загрузить меню"
         }

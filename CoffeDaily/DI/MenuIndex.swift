@@ -1,5 +1,5 @@
 //
-//  MenuInde.swift
+//  MenuIndex.swift
 //  CoffeDaily
 //
 //  Created by Alex on 24.08.2025.

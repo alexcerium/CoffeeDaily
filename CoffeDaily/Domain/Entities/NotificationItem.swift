@@ -12,7 +12,11 @@ public struct NotificationItem: Identifiable {
     public let title: String
     public let message: String
     public let date: Date
-    public init(id: UUID = UUID(), title: String, message: String, date: Date) {
-        self.id = id; self.title = title; self.message = message; self.date = date
+
+    public init(id: UUID, title: String, message: String, date: Date) {
+        self.id = id
+        self.title = title
+        self.message = message
+        self.date = date
     }
- }
+}

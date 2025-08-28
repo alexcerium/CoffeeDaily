@@ -1,5 +1,5 @@
 //
-//  Theme.swift
+//  Colors.swift
 //  CoffeDaily
 //
 //  Created by Aleksandr on 19.04.2025.

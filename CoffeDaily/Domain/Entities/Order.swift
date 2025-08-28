@@ -11,7 +11,9 @@ public struct Order: Identifiable {
     public let id: UUID
     public let date: Date
     public let items: [CartItem]
-    public init(id: UUID = UUID(), date: Date, items: [CartItem]) {
-    self.id = id; self.date = date; self.items = items
-            }
+    public init(id: UUID, date: Date, items: [CartItem]) {
+        self.id = id
+        self.date = date
+        self.items = items
+    }
 }

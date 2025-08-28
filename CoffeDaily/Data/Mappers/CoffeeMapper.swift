@@ -5,12 +5,11 @@
 //  Created by Alex on 24.08.2025.
 //
 
-// Data/Mappers/CoffeeMapper.swift
 import Foundation
 
 enum CoffeeMapper {
     static func map(_ dto: CoffeeDTO) -> CoffeeItem {
-        let uuid = dto.id.flatMap { UUID(uuidString: $0) } ?? UUID()
+        let uuid = StableID.fromOptional(dto.id, seed: dto.title)
         return CoffeeItem(
             id: uuid,
             imageName: dto.imageName,

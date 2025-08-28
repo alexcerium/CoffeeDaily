@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 final class CartViewModel: ObservableObject {
     @Published var items: [CartItem] = []
     @Published var animateBadge = false
@@ -33,55 +34,78 @@ final class CartViewModel: ObservableObject {
         self.clearUseCase = clear
         self.observeTotalsUseCase = observeTotals
 
-        // Стартуем поток тоталов и первичную загрузку
+        // Запускаем поток тоталов и первичную загрузку
         let stream = observeTotalsUseCase.stream()
         Task { await self.consumeTotals(stream) }
-        Task { await self.refresh() }
+        Task { await self.reload() }
     }
+
+    // MARK: - Public API
 
     func add(_ coffeeItem: CoffeeItem, size: String) {
         Task {
             try? await addUseCase.execute(itemId: coffeeItem.id, size: size, qty: 1)
-            await refresh()
+            // Можно обновить список, так как это не в цикле рендера CartView
+            await reload()
             await bumpBadge()
         }
     }
 
-    func update(_ cartItem: CartItem) {
-        Task {
-            try? await updateUseCase.execute(itemId: cartItem.item.id, size: cartItem.size, qty: cartItem.quantity)
-            await refresh()
-        }
+    /// Асинхронное обновление позиции в бэкенде БЕЗ немедленного reload().
+    /// UI уже отражает изменения через @Binding.
+    func updateAsync(_ cartItem: CartItem) async {
+        try? await updateUseCase.execute(itemId: cartItem.item.id,
+                                         size: cartItem.size,
+                                         qty: cartItem.quantity)
+        // Преднамеренно без reload() — избегаем публикаций во время рендера.
     }
 
-    func replace(with items: [CartItem]) {
+    /// Вспомогательный синтаксический сахар.
+    func update(_ cartItem: CartItem) {
+        Task { await updateAsync(cartItem) }
+    }
+
+    /// Оптимистичное удаление: сразу правим локальный список, потом синхронизируемся.
+    func remove(_ cartItem: CartItem) {
+        // Локально убрать из UI
+        if let idx = items.firstIndex(where: { $0.id == cartItem.id }) {
+            items.remove(at: idx)
+        }
+        // Бэкенд — асинхронно, без дополнительной публикации
+        Task { try? await removeUseCase.execute(itemId: cartItem.item.id, size: cartItem.size) }
+    }
+
+    /// Полная замена корзины (повтор заказа): локально заменить и синхронизировать.
+    func replace(with newItems: [CartItem]) {
+        // Локально сразу показываем новые позиции
+        items = newItems
+        // Бэкенд: чистим и добавляем без reload(), чтобы не ломать рендер
         Task {
             try? await clearUseCase.execute()
-            for it in items {
+            for it in newItems {
                 try? await addUseCase.execute(itemId: it.item.id, size: it.size, qty: it.quantity)
             }
-            await refresh()
         }
     }
 
-    func clear() {
-        Task { try? await clearUseCase.execute(); await refresh() }
+    func clear() async {
+        // Локально
+        items = []
+        // Бэкенд
+        try? await clearUseCase.execute()
     }
 
-    func remove(_ cartItem: CartItem) {
-        Task { try? await removeUseCase.execute(itemId: cartItem.item.id, size: cartItem.size); await refresh() }
+    /// Явная перезагрузка списка из бэкенда. Вызывать при входе на экран.
+    func reload() async {
+        if let newItems = try? await getCart.execute() {
+            self.items = newItems
+        }
     }
 
     var totalCount: Int { totals.items }
 
     // MARK: - Private
 
-    @MainActor
-    private func refresh() async {
-        if let newItems = try? await getCart.execute() { self.items = newItems }
-    }
-
-    @MainActor
     private func consumeTotals(_ stream: AsyncStream<CartTotals>) async {
         for await t in stream {
             let old = totals
@@ -90,7 +114,6 @@ final class CartViewModel: ObservableObject {
         }
     }
 
-    @MainActor
     private func bumpBadge() async {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { animateBadge = true }
         await MainActor.run {

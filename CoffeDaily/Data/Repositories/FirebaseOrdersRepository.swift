@@ -5,9 +5,9 @@
 //  Created by Alex on 24.08.2025.
 //
 
-// Data/Repositories/FirebaseOrdersRepository.swift
 import FirebaseAuth
 import FirebaseFirestore
+import Foundation
 
 final class FirebaseOrdersRepository: OrdersRepository {
     private let db = Firestore.firestore()
@@ -26,12 +26,19 @@ final class FirebaseOrdersRepository: OrdersRepository {
 
     @discardableResult
     func place(_ draft: OrderDraft) async throws -> Order {
-        let dto = OrderDTO(id: nil, date: Date(), items: draft.items.map(CartMapper.toDTO(_:)))
+        let dto = OrderDTO(
+            id: nil,
+            date: Date(),
+            items: draft.items.map { CartMapper.toDTO($0) }
+        )
         let ref = try coll().addDocument(from: dto)
+
         let saved = try await ref.getDocument()
         let back = try saved.data(as: OrderDTO.self)
-        let entities = back.items.compactMap { CartMapper.toEntity($0, resolve: resolve) }
-        return Order(date: back.date, items: entities)
+
+        let entities = back.items.map { CartMapper.toEntityLenient($0, resolve: resolve) }
+        let id = StableID.fromString(saved.documentID)
+        return Order(id: id, date: back.date, items: entities)
     }
 
     func fetchHistory() async throws -> [Order] {
@@ -41,7 +48,13 @@ final class FirebaseOrdersRepository: OrdersRepository {
     }
 
     func reorder(orderId: UUID) async throws -> [CartItem] {
-        let list = try await fetchHistory()
-        return list.first?.items ?? []
+        let snap = try await coll().getDocuments()
+        for doc in snap.documents {
+            if StableID.fromString(doc.documentID) == orderId {
+                let dto = try doc.data(as: OrderDTO.self)
+                return dto.items.map { CartMapper.toEntityLenient($0, resolve: resolve) }
+            }
+        }
+        return []
     }
 }
