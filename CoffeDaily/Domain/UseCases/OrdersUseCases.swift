@@ -2,8 +2,6 @@
 //  OrdersUseCases.swift
 //  CoffeDaily
 //
-//  Created by Alex on 24.08.2025.
-//
 
 import Foundation
 
@@ -22,5 +20,5 @@ public struct FetchOrdersUseCase {
 public struct ReorderUseCase {
     let repo: OrdersRepository
     public init(repo: OrdersRepository) { self.repo = repo }
-    public func execute(orderId: UUID) async throws -> [CartItem] { try await repo.reorder(orderId: orderId) }
+    public func execute(orderDocId: String) async throws -> [CartItem] { try await repo.reorder(orderDocId: orderDocId) }
 }

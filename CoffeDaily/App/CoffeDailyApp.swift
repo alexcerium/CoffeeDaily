@@ -27,7 +27,7 @@ struct CoffeeDailyApp: App {
 
         // 2) Firestore cache
         let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true 
+        settings.isPersistenceEnabled = true
         Firestore.firestore().settings = settings
 
         // 3) DI
@@ -37,7 +37,7 @@ struct CoffeeDailyApp: App {
         let coord = AppCoordinator()
         _coordinator = StateObject(wrappedValue: coord)
 
-        // Предзагрузка меню (для индекса)
+        // Предзагрузка меню (для индекса), чтобы Cart/Orders могли резолвить позиции
         Task {
             if let items = try? await container.fetchMenu.execute() {
                 MenuIndex.shared.update(items)
@@ -92,6 +92,7 @@ struct CoffeeDailyApp: App {
                 switch sessionViewModel.state {
                 case .loading:
                     ZStack { Color.clear.ignoresSafeArea(); ProgressView() }
+
                 case .unauthorized:
                     AuthScreen(
                         signInEmail:       container.signInEmail,
@@ -99,9 +100,12 @@ struct CoffeeDailyApp: App {
                         signInAnon:        container.signInAnonymously,
                         linkAnonToEmail:   container.linkAnonymousToEmail
                     )
+
                 case .authorized:
                     NavigationStack(path: $coordinator.path) {
                         CoffeeHomeView()
+                            // DEBUG-сид: один раз на пользователя, без «1/2» в названиях
+                           
                     }
                 }
             }

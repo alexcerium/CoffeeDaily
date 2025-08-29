@@ -2,8 +2,6 @@
 //  OrdersRepository.swift
 //  CoffeDaily
 //
-//  Created by Alex on 24.08.2025.
-//
 
 import Foundation
 
@@ -13,5 +11,5 @@ public protocol OrdersRepository {
     @discardableResult
     func place(_ draft: OrderDraft) async throws -> Order
     func fetchHistory() async throws -> [Order]
-    func reorder(orderId: UUID) async throws -> [CartItem]
+    func reorder(orderDocId: String) async throws -> [CartItem]   // строго по документу
 }

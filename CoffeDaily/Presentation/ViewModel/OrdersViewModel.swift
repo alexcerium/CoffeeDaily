@@ -5,6 +5,11 @@
 //  Created by Aleksandr on 21.04.2025.
 //
 
+//
+//  OrdersViewModel.swift
+//  CoffeDaily
+//
+
 import Foundation
 
 final class OrdersViewModel: ObservableObject {
@@ -24,14 +29,13 @@ final class OrdersViewModel: ObservableObject {
         if let list = try? await fetch.execute() { self.orders = list }
     }
 
-    @MainActor func placeOrder(from cartItems: [CartItem]) async {
+    @MainActor func placeOrder(from cartItems: [CartItem]) async throws {
         let draft = OrderDraft(items: cartItems)
-        if let order = try? await place.execute(draft) {
-            orders.insert(order, at: 0)
-        }
+        let order = try await place.execute(draft)
+        orders.insert(order, at: 0)
     }
 
-    func itemsForReorder(orderId: UUID) async -> [CartItem] {
-        (try? await reorderUseCase.execute(orderId: orderId)) ?? []
+    func itemsForReorder(orderDocId: String) async -> [CartItem] {
+        (try? await reorderUseCase.execute(orderDocId: orderDocId)) ?? []
     }
 }

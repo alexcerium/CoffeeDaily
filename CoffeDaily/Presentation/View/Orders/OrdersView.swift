@@ -5,6 +5,11 @@
 //  Created by Aleksandr on 21.04.2025.
 //
 
+//
+//  OrdersView.swift
+//  CoffeDaily
+//
+
 import SwiftUI
 
 struct OrdersView: View {
@@ -22,8 +27,7 @@ struct OrdersView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.mocha, .mint],
-                           startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [.mocha, .mint], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
 
             ScrollView {
@@ -43,8 +47,7 @@ struct OrdersView: View {
                                         Spacer()
                                         Button {
                                             Task {
-                                                // Получаем актуальные позиции для повтора из репозитория
-                                                let items = await ordersViewModel.itemsForReorder(orderId: order.id)
+                                                let items = await ordersViewModel.itemsForReorder(orderDocId: order.id)
                                                 await MainActor.run {
                                                     cartViewModel.replace(with: items)
                                                     coordinator.navigate(to: .cart)
@@ -56,18 +59,26 @@ struct OrdersView: View {
                                                 .foregroundStyle(.white)
                                         }
                                     }
-                                    ForEach(order.items) { ci in
+
+                                    ForEach(order.lines) { line in
                                         HStack {
-                                            Text("\(ci.quantity)× \(ci.item.title) (\(ci.size))")
+                                            Text("\(line.qty)× \(line.title) (\(line.size))")
                                                 .font(.subheadline)
                                                 .foregroundStyle(.white)
                                             Spacer()
-                                            let unit = ci.item.prices[ci.size] ?? 0
-                                            let lineTotal = unit * Double(ci.quantity)
+                                            let lineTotal = line.unitPrice * Double(line.qty)
                                             Text("€\(lineTotal, specifier: "%.2f")")
                                                 .font(.subheadline.weight(.medium))
                                                 .foregroundStyle(.white)
                                         }
+                                    }
+
+                                    Divider().overlay(Color.white.opacity(0.2))
+                                    HStack {
+                                        Spacer()
+                                        Text("Итого: €\(order.total, specifier: "%.2f")")
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(.white)
                                     }
                                 }
                                 .padding()

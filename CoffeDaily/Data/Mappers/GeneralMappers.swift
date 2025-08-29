@@ -26,25 +26,22 @@ enum StableID {
         if let s = string { return fromString(s) }
         return fromString("seed:\(seed)")
     }
+
+    static func sha256Hex(_ text: String) -> String {
+        let digest = SHA256.hash(data: Data(text.utf8))
+        return digest.compactMap { String(format: "%02x", $0) }.joined()
+    }
 }
 
 enum CartMapper {
-    /// Strict mapping: drops row if item can't be resolved.
     static func toEntity(_ dto: CartItemDTO, resolve: (UUID) -> CoffeeItem?) -> CartItem? {
         guard let uuid = UUID(uuidString: dto.itemId), let item = resolve(uuid) else { return nil }
         return CartItem(item: item, size: dto.size, quantity: dto.qty)
     }
 
-    /// Lenient mapping: preserves row with a placeholder when index is not ready.
     static func toEntityLenient(_ dto: CartItemDTO, resolve: (UUID) -> CoffeeItem?) -> CartItem {
         let uuid = UUID(uuidString: dto.itemId) ?? StableID.fromString(dto.itemId)
-        let item = resolve(uuid) ?? CoffeeItem(
-            id: uuid,
-            imageName: "placeholder",
-            title: "…",
-            description: "",
-            prices: [:]
-        )
+        let item = resolve(uuid) ?? CoffeeItem(id: uuid, imageName: "placeholder", title: "…", description: "", prices: [:])
         return CartItem(item: item, size: dto.size, quantity: dto.qty)
     }
 
@@ -55,14 +52,12 @@ enum CartMapper {
 
 enum OrderMapper {
     static func toEntity(_ dto: OrderDTO, resolve: (UUID) -> CoffeeItem?) -> Order? {
-        let items = dto.items.map { CartMapper.toEntityLenient($0, resolve: resolve) }
-        let iso = ISO8601DateFormatter().string(from: dto.date)
-        let id = StableID.fromOptional(dto.id, seed: iso)
-        return Order(id: id, date: dto.date, items: items)
-    }
-
-    static func toDTO(_ entity: Order) -> OrderDTO {
-        .init(id: nil, date: entity.date, items: entity.items.map { CartMapper.toDTO($0) })
+        guard let docId = dto.id else { return nil }
+        let lines: [OrderLine] = dto.items.compactMap { it in
+            let uuid = UUID(uuidString: it.itemId) ?? StableID.fromString(it.itemId)
+            return OrderLine(itemId: uuid, title: it.title, imageName: it.imageName, size: it.size, qty: it.qty, unitPrice: it.unitPrice)
+        }
+        return Order(id: docId, date: dto.date, lines: lines, total: dto.total)
     }
 }
 

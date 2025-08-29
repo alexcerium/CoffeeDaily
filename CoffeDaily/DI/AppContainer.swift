@@ -54,13 +54,9 @@ final class AppContainer: ObservableObject {
     private(set) var signOut: SignOutUseCase
 
     init() {
-        // Current UID provider (resolved on each repository call)
         let uidProvider: () -> String? = { Auth.auth().currentUser?.uid }
-
-        // Index resolver for mapping cart/order items
         let resolveById: (UUID) -> CoffeeItem? = { MenuIndex.shared.item(by: $0) }
 
-        // Repositories (real Firestore/Auth only)
         let authRepo = FirebaseAuthRepository()
         let coffeeRepo = FirebaseCoffeeRepository()
         let cartRepo   = FirebaseCartRepository(uidProvider: uidProvider, resolveItem: resolveById)
@@ -77,7 +73,6 @@ final class AppContainer: ObservableObject {
         self.locationsRepository = locsRepo
         self.userRepository = userRepo
 
-        // Use cases
         self.fetchMenu = FetchMenuUseCase(repository: coffeeRepo)
 
         self.getCart = GetCartUseCase(repo: cartRepo)

@@ -2,15 +2,25 @@
 //  OrderDTO.swift
 //  CoffeDaily
 //
-//  Created by Alex on 24.08.2025.
+//  Денормализованный заказ пользователя
 //
 
-// OrderDTO.swift
 import Foundation
 import FirebaseFirestore
+
+struct OrderItemDTO: Codable {
+    var itemId: String        // UUID String
+    var title: String         // зафиксированное имя на момент покупки
+    var imageName: String
+    var size: String
+    var qty: Int
+    var unitPrice: Double     // зафиксированная цена на момент покупки
+}
 
 struct OrderDTO: Codable, Identifiable {
     @DocumentID var id: String?
     var date: Date
-    var items: [CartItemDTO]
+    var items: [OrderItemDTO]
+    var total: Double
+    var idempotencyKey: String
 }

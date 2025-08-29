@@ -5,6 +5,11 @@
 //  Created by Aleksandr on 21.04.2025.
 //
 
+//
+//  PaymentView.swift
+//  CoffeDaily
+//
+
 import SwiftUI
 
 struct PaymentView: View {
@@ -12,10 +17,13 @@ struct PaymentView: View {
     @EnvironmentObject private var cartViewModel: CartViewModel
     @EnvironmentObject private var ordersViewModel: OrdersViewModel
 
+    @State private var isWorking = false
+    @State private var showError = false
+    @State private var errorText = ""
+
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.mocha, .mint],
-                           startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [.mocha, .mint], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
@@ -28,19 +36,37 @@ struct PaymentView: View {
                 Spacer()
 
                 PillButton(title: "Оплатить", sfSymbol: nil) {
+                    guard !isWorking else { return }
+                    isWorking = true
                     Task {
-                        // Проводим оплату через доменный слой (репозиторий заказов)
-                        await ordersViewModel.placeOrder(from: cartViewModel.items)
-                        // Очищаем корзину через репозиторий
-                        await cartViewModel.clear()
-                        // Навигация в историю только после успешного завершения операций
-                        coordinator.navigate(to: .orders)
+                        do {
+                            try await ordersViewModel.placeOrder(from: cartViewModel.items)
+                            try await cartViewModel.clear()
+                            coordinator.navigate(to: .orders)
+                        } catch {
+                            await MainActor.run {
+                                errorText = error.localizedDescription
+                                showError = true
+                            }
+                        }
+                        isWorking = false
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 20)
+                .opacity(isWorking ? 0.7 : 1)
+            }
+
+            if isWorking { ProgressView().tint(.white) }
+            if showError {
+                VStack {
+                    Toast(style: .error, message: errorText)
+                        .padding(.top, 12)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
             }
         }
         .navigationBarBackButtonHidden(true)

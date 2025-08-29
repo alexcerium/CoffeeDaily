@@ -81,12 +81,8 @@ struct CartItemCard: View {
             RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
         )
-        // Без onChange: синхронизируемся в фоне ПОСЛЕ рендера
-        .task(id: cartItem.size) {
-            await cartViewModel.updateAsync(cartItem)
-        }
-        .task(id: cartItem.quantity) {
-            await cartViewModel.updateAsync(cartItem)
-        }
+        // Persist to Firestore whenever size/quantity changes (after render)
+        .task(id: cartItem.size) { await cartViewModel.updateAsync(cartItem) }
+        .task(id: cartItem.quantity) { await cartViewModel.updateAsync(cartItem) }
     }
 }
